@@ -224,3 +224,13 @@ docker-compose up --build
 ```
 
 Se precisar de mais alguma coisa, por favor, avise!
+
+
+
+---
+
+
+### [chatgpt debug link]
+(https://chatgpt.com/share/db765ff0-67e1-47b4-8ecc-eadc57be7f10)
+---
+
