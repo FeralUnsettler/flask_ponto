@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 class User(db.Model):
-    
+    __tablename__ = 'user'  # Confirme o nome da tabela
     
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
@@ -13,8 +13,8 @@ class User(db.Model):
     admin = db.Column(db.Boolean, default=False, nullable=False)
 
 class Colaborador(db.Model):
-    
-    
+    __tablename__ = 'colaborador'  # Confirme o nome da tabela
+
     id = db.Column(db.Integer, primary_key=True)
     cpf = db.Column(db.String(11), unique=True, nullable=False)
     nome = db.Column(db.String(120), nullable=False)
@@ -27,10 +27,10 @@ class Colaborador(db.Model):
     funcao = db.Column(db.String(50), nullable=False)
     ativo = db.Column(db.Boolean, default=True)
     usuario = db.Column(db.String(50), unique=True, nullable=False)
-    horario = db.relationship('horario', backref='colaborador', lazy=True)
+
 
 class Horario(db.Model):
-    
+    __tablename__ = 'horario'  # Confirme o nome da tabela
     
     id = db.Column(db.Integer, primary_key=True)
     colaborador_id = db.Column(db.Integer, db.ForeignKey('colaborador.id'), nullable=False)

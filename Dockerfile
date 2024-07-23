@@ -8,7 +8,7 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /usr/src/app
 
 # Install system dependencies
-RUN apk update && apk add --no-cache netcat
+RUN apk update && apk add --no-cache netcat-openbsd
 
 # Install dependencies
 COPY requirements.txt /usr/src/app/
