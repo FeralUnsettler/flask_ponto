@@ -14,7 +14,7 @@ def create_db():
 @cli.command("seed_db")
 def seed_db():
     # Criar usuário administrador
-    admin = User(username="admin", email="admin@example.com", password="admin123", role="admin")
+    admin = User(username="admin", email="admin@example.com", password="admin123", role=True)
     db.session.add(admin)
     
     # Criar 10 colaboradores fictícios

@@ -367,7 +367,7 @@ Depois de configurar tudo, siga estes passos para executar o Docker Compose, cri
 
 2. Reconstrua a imagem e inicie os containers:
    ```sh
-   docker compose up --build
+   docker compose up -d --build
    ```
 
 3. Em outra janela de terminal, execute os comandos de criação e seed do banco de dados:
