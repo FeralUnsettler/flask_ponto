@@ -21,7 +21,8 @@ with app.app_context():
             cargo='Analista',
             funcao='Desenvolvedor',
             data_rescisao=None,
-            usuario='joao_silva'
+            usuario='joao_silva',
+            senha='123'
         ),
         Colaborador(
             cpf='98765432109',
@@ -32,7 +33,8 @@ with app.app_context():
             cargo='Gerente',
             funcao='Gestora de Projetos',
             data_rescisao=None,
-            usuario='maria_oliveira'
+            usuario='maria_oliveira',
+            senha='123'
         )
     ]
 
