@@ -116,7 +116,7 @@ RUN pip install -r requirements.txt
 Agora, você pode executar o script diretamente no contêiner Docker. Utilize o comando abaixo para entrar no contêiner e rodar o script:
 
 ```bash
-docker-compose exec web python app/insert_data.py
+docker compose exec web python app/insert_data.py
 ```
 
 ### 4. Confirmar a Inserção
