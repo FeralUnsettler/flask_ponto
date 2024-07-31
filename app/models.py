@@ -13,6 +13,7 @@ class Colaborador(db.Model):
     cargo = db.Column(db.String(50))
     funcao = db.Column(db.String(50))
     usuario = db.Column(db.String(50), unique=True, nullable=False)
+    senha = db.Column(db.String(11), unique=True, nullable=False)
 
     def __repr__(self):
         return f'<Colaborador {self.nome}>'
