@@ -1,379 +1,155 @@
-O problema ocorre porque a função `url_quote` foi removida ou renomeada em uma versão mais recente do `werkzeug`. Para resolver este problema, precisamos usar uma versão específica do `werkzeug` que ainda inclui a função `url_quote`, ou atualizar o código para compatibilidade com a versão atual do `werkzeug`.
 
-Vamos atualizar a versão do `werkzeug` no `requirements.txt` para uma versão que ainda inclui `url_quote`. Vamos usar `werkzeug==2.0.3`, que deve funcionar com a versão do Flask que estamos usando.
+### 2. Suba os Contêineres com Docker Compose
 
-### Atualização do `requirements.txt`
+Depois de criar a estrutura do projeto, você precisa subir os contêineres Docker. Na raiz do seu projeto (onde está o arquivo `docker-compose.yml`), execute o seguinte comando:
 
-```txt
-Flask==2.0.3
-Flask-SQLAlchemy==2.5.1
-Flask-Migrate==3.1.0
-psycopg2-binary==2.9.3
-gunicorn==20.1.0
-werkzeug==2.0.3
+```bash
+docker compose up -d --build
 ```
 
-### Rebuild do Docker
+Este comando irá:
 
-Depois de atualizar o `requirements.txt`, precisamos reconstruir a imagem Docker para instalar a versão correta do `werkzeug`.
+- Construir a imagem Docker para o seu serviço web.
+- Iniciar os contêineres web e db (PostgreSQL).
 
-1. Pare e remova os containers existentes:
-   ```sh
-   docker-compose down
-   ```
+### 3. Inicialize o Banco de Dados
 
-2. Reconstrua a imagem e inicie os containers:
-   ```sh
-   docker-compose up --build
-   ```
+Após subir os contêineres, você precisa criar as tabelas no banco de dados. Para isso, abra outro terminal e execute o seguinte comando para acessar o contêiner web:
 
-Se preferir atualizar o código para compatibilidade com a versão mais recente do `werkzeug`, substitua `url_quote` por `quote` do módulo `urllib.parse` da biblioteca padrão do Python:
-
-### Atualização do Código
-
-Em vez de importar `url_quote` de `werkzeug.urls`, podemos usar a função `quote` de `urllib.parse`. Essa mudança pode ser necessária em arquivos dentro do pacote `Flask` e seus dependentes, mas vamos focar nas partes do código que você controla diretamente.
-
-**Atualize a importação e uso de `url_quote`**:
-
-### app/__init__.py
-
-Verifique se não há importações de `url_quote` no seu código. Se houver, altere para:
-
-```python
-from urllib.parse import quote as url_quote
+```bash
+docker compose exec web flask db init
+docker compose exec web flask db migrate -m "Initial migration."
+docker compose exec web flask db upgrade
 ```
 
-Esta alteração permite que você use `url_quote` da mesma forma que antes.
+Esses comandos irão:
 
-### Reconstrução do Docker
+- Inicializar o diretório de migrações.
+- Criar uma migração inicial para o banco de dados.
+- Aplicar a migração ao banco de dados, criando as tabelas definidas em `models.py`.
 
-Após as atualizações no código, reconstrua e reinicie o Docker:
+### 4. Acesse a Aplicação
 
-1. Pare e remova os containers existentes:
-   ```sh
-   docker-compose down
-   ```
+Depois de inicializar o banco de dados, a aplicação estará rodando no endereço:
 
-2. Reconstrua a imagem e inicie os containers:
-   ```sh
-   docker-compose up --build
-   ```
+```
+http://localhost:5000
+```
 
-Isso deve resolver o problema de compatibilidade com a função `url_quote`. Se encontrar mais erros relacionados, certifique-se de atualizar o código ou ajustar as versões das dependências conforme necessário.
+### 5. Parar os Contêineres
+
+Para parar os contêineres, você pode usar `Ctrl + C` no terminal onde está rodando o `docker compose up`. Alternativamente, em outro terminal, você pode executar:
+
+```bash
+docker compose down
+```
+
+Este comando irá parar e remover todos os contêineres, redes e volumes definidos no `docker-compose.yml`.
+
+Seguindo esses passos, sua aplicação web estará rodando e acessível via navegador. Se precisar de mais alguma coisa, estou à disposição!
 
 
 ---
 
-O problema atual está relacionado ao uso de uma versão incompatível do SQLAlchemy. Parece que você está usando uma versão do Flask-SQLAlchemy que não é compatível com a versão mais recente do SQLAlchemy. Vamos corrigir isso especificando versões compatíveis de ambos os pacotes.
+# Populando o DB
 
-### Atualização do `requirements.txt`
+Para inserir colaboradores de teste na aplicação, você pode seguir os passos abaixo. Vamos utilizar o Flask CLI e o SQLAlchemy para adicionar registros ao banco de dados diretamente do terminal.
 
-```txt
-Flask==2.0.3
-Flask-SQLAlchemy==2.5.1
-Flask-Migrate==3.1.0
-psycopg2-binary==2.9.3
-gunicorn==20.1.0
-werkzeug==2.0.3
-SQLAlchemy==1.4.32
-```
+### 1. Adicionar Função de Script para Inserir Dados
 
-### Rebuild do Docker
-
-Depois de atualizar o `requirements.txt`, vamos reconstruir a imagem Docker para garantir que as versões corretas dos pacotes sejam instaladas.
-
-1. Pare e remova os containers existentes:
-   ```sh
-   docker-compose down
-   ```
-
-2. Reconstrua a imagem e inicie os containers:
-   ```sh
-   docker-compose up --build
-   ```
-
-Essas etapas devem resolver o problema de compatibilidade com a função `__all__` do SQLAlchemy.
-
-### Confirmar o código do seu projeto
-
-Vamos também garantir que o código do seu projeto esteja correto. Abaixo está um exemplo básico de como o `app/__init__.py` pode ser estruturado:
+Primeiro, vamos criar um script para inserir colaboradores de teste. Adicione um arquivo `insert_data.py` na pasta `app` com o seguinte conteúdo:
 
 ```python
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
+from app import create_app, db
+from app.models import Colaborador
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@db:5432/postgres'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app = create_app()
 
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+with app.app_context():
+    # Adicione seus colaboradores de teste aqui
+    colaboradores = [
+        Colaborador(
+            cpf='12345678901',
+            nome='João Silva',
+            data_nascimento='1980-01-01',
+            data_admissao='2020-01-01',
+            email='joao.silva@example.com',
+            cargo='Analista',
+            funcao='Desenvolvedor',
+            data_rescisao=None,
+            usuario='joao_silva'
+        ),
+        Colaborador(
+            cpf='98765432109',
+            nome='Maria Oliveira',
+            data_nascimento='1985-05-05',
+            data_admissao='2018-05-05',
+            email='maria.oliveira@example.com',
+            cargo='Gerente',
+            funcao='Gestora de Projetos',
+            data_rescisao=None,
+            usuario='maria_oliveira'
+        )
+    ]
 
-from app import routes, models
+    db.session.bulk_save_objects(colaboradores)
+    db.session.commit()
+    print('Colaboradores inseridos com sucesso!')
 ```
 
-### Confirmar `manage.py`
+### 2. Atualizar `Dockerfile` e `docker-compose.yml`
 
-Certifique-se de que o `manage.py` esteja correto:
-
-```python
-from flask.cli import FlaskGroup
-from app import app, db
-
-cli = FlaskGroup(app)
-
-if __name__ == '__main__':
-    cli()
-```
-
-### Estrutura do Projeto
-
-Certifique-se de que sua estrutura de projeto esteja conforme o esperado:
-
-```
-/app
-    /app
-        __init__.py
-        routes.py
-        models.py
-    manage.py
-    Dockerfile
-    requirements.txt
-    docker-compose.yml
-```
-
-Depois de verificar tudo isso, siga as etapas acima para reconstruir e iniciar seus containers Docker. Isso deve resolver os problemas que você está enfrentando.
-
-
----
-
-
-Se o container do web service está saindo com o código 0, isso normalmente indica que o processo terminou corretamente, mas não permaneceu em execução. Isso pode ocorrer se o Flask não foi iniciado corretamente. Vamos garantir que o aplicativo Flask esteja configurado para ser executado corretamente dentro do Docker.
-
-### Certificar que o `app` está sendo executado
-
-Certifique-se de que o seu `manage.py` esteja configurado para iniciar o servidor Flask corretamente:
-
-### manage.py
-
-```python
-from flask.cli import FlaskGroup
-from app import app, db
-
-cli = FlaskGroup(app)
-
-if __name__ == '__main__':
-    cli()
-```
-
-### Dockerfile
-
-Certifique-se de que o Dockerfile está configurado corretamente para iniciar o aplicativo Flask:
+Certifique-se de que o seu `Dockerfile` e `docker-compose.yml` estão configurados para permitir a execução de comandos personalizados. Adicione o seguinte ao seu `Dockerfile` para instalar dependências e copiar scripts:
 
 ```Dockerfile
-FROM python:3.10-alpine
+# Dockerfile
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# outras linhas...
 
-# Set work directory
+COPY . /app
 WORKDIR /app
-
-# Install dependencies
-COPY requirements.txt /app/
-RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
-
-# Copy project
-COPY . /app/
-
-# Expose the port the app runs on
-EXPOSE 5000
-
-# Run the Flask app
-CMD ["flask", "run", "--host=0.0.0.0"]
 ```
 
-### docker-compose.yml
+### 3. Executar o Script
 
-Certifique-se de que o Docker Compose está configurado corretamente para iniciar o serviço web:
+Agora, você pode executar o script diretamente no contêiner Docker. Utilize o comando abaixo para entrar no contêiner e rodar o script:
 
-```yaml
-version: '3.8'
-
-services:
-  web:
-    build: .
-    command: flask run --host=0.0.0.0
-    volumes:
-      - .:/app
-    ports:
-      - "5000:5000"
-    environment:
-      FLASK_APP: manage.py
-      FLASK_ENV: development
-    depends_on:
-      - db
-
-  db:
-    image: postgres:13
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+```bash
+docker-compose exec web python app/insert_data.py
 ```
 
-### Executar o Docker Compose
+### 4. Confirmar a Inserção
 
-Depois de verificar as configurações, execute os seguintes comandos para parar quaisquer containers em execução, reconstruir as imagens e iniciar os serviços novamente:
+Você pode confirmar que os colaboradores foram inseridos acessando a rota de listagem de colaboradores na sua aplicação. 
 
-1. Pare e remova os containers existentes:
-   ```sh
-   docker-compose down
-   ```
+### Atualização do Script
 
-2. Reconstrua a imagem e inicie os containers:
-   ```sh
-   docker-compose up --build
-   ```
-
-Isso deve garantir que o Flask seja iniciado corretamente dentro do container Docker e que o serviço permaneça em execução. Se o problema persistir, revise os logs de saída do Docker para obter mais informações sobre por que o container pode estar saindo.
-
-
----
-insert database
-
----
-
-Vamos ajustar o código e a configuração para criar o banco de dados com um usuário administrador e dez colaboradores fictícios. Vamos adicionar uma função de seed (semeadura) ao nosso projeto para inserir esses dados iniciais no banco de dados.
-
-### Atualizar `models.py`
-
-Primeiro, vamos atualizar o `models.py` para definir os modelos de dados:
+Certifique-se de que os modelos e a configuração do aplicativo estão corretos. O modelo `Colaborador` deve estar definido em `app/models.py`. Aqui está um exemplo básico:
 
 ```python
-from datetime import datetime
-from flask_sqlalchemy import SQLAlchemy
+# app/models.py
 
-db = SQLAlchemy()
-
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(120), nullable=False)
-    role = db.Column(db.String(20), nullable=False)  # 'admin' ou 'user'
+from app import db
 
 class Colaborador(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     cpf = db.Column(db.String(11), unique=True, nullable=False)
-    nome = db.Column(db.String(120), nullable=False)
-    email = db.Column(db.String(120), nullable=False)
-    telefone = db.Column(db.String(15), nullable=True)
+    nome = db.Column(db.String(100), nullable=False)
     data_nascimento = db.Column(db.Date, nullable=False)
     data_admissao = db.Column(db.Date, nullable=False)
-    data_rescisao = db.Column(db.Date, nullable=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
     cargo = db.Column(db.String(50), nullable=False)
     funcao = db.Column(db.String(50), nullable=False)
-    ativo = db.Column(db.Boolean, default=True)
-    usuario = db.Column(db.String(50), unique=True, nullable=False)
-    horario = db.relationship('Horario', backref='colaborador', lazy=True)
-
-class Horario(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    colaborador_id = db.Column(db.Integer, db.ForeignKey('colaborador.id'), nullable=False)
-    dia_semana = db.Column(db.String(10), nullable=False)
-    entrada1 = db.Column(db.Time, nullable=True)
-    saida1 = db.Column(db.Time, nullable=True)
-    entrada2 = db.Column(db.Time, nullable=True)
-    saida2 = db.Column(db.Time, nullable=True)
+    data_rescisao = db.Column(db.Date, nullable=True)
+    usuario = db.Column(db.String(100), unique=True, nullable=False)
 ```
 
-### Atualizar `manage.py` para incluir a função de seed
+### Passo a Passo Completo
 
-Vamos adicionar uma função de seed ao `manage.py` para popular o banco de dados com dados iniciais:
+1. **Criar o Script de Inserção de Dados (`insert_data.py`)**
+2. **Atualizar o Dockerfile para Incluir Dependências e Scripts**
+3. **Entrar no Contêiner Docker e Executar o Script**
+4. **Confirmar a Inserção de Dados na Aplicação**
 
-```python
-from flask.cli import FlaskGroup
-from app import app, db
-from app.models import User, Colaborador, Horario
-from datetime import datetime
-
-cli = FlaskGroup(app)
-
-@cli.command("create_db")
-def create_db():
-    db.drop_all()
-    db.create_all()
-    db.session.commit()
-
-@cli.command("seed_db")
-def seed_db():
-    # Criar usuário administrador
-    admin = User(username="admin", email="admin@example.com", password="admin123", role="admin")
-    db.session.add(admin)
-    
-    # Criar 10 colaboradores fictícios
-    for i in range(1, 11):
-        colaborador = Colaborador(
-            cpf=f"1234567890{i}",
-            nome=f"Colaborador {i}",
-            email=f"colaborador{i}@example.com",
-            telefone=f"99999-999{i}",
-            data_nascimento=datetime(1990, 1, 1),
-            data_admissao=datetime(2020, 1, 1),
-            cargo="Cargo Exemplo",
-            funcao="Funcao Exemplo",
-            usuario=f"colaborador_{i}"
-        )
-        db.session.add(colaborador)
-    db.session.commit()
-
-if __name__ == '__main__':
-    cli()
-```
-
-### Atualizar `__init__.py` para importar modelos
-
-Certifique-se de que `app/__init__.py` importa os modelos:
-
-```python
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@db:5432/postgres'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-
-from app import models
-```
-
-### Executar o Docker Compose e Popular o Banco de Dados
-
-Depois de configurar tudo, siga estes passos para executar o Docker Compose, criar o banco de dados e popular com dados iniciais:
-
-1. Pare e remova quaisquer containers existentes:
-   ```sh
-   docker compose down -v
-   ```
-
-2. Reconstrua a imagem e inicie os containers:
-   ```sh
-   docker compose up -d --build
-   ```
-
-3. Em outra janela de terminal, execute os comandos de criação e seed do banco de dados:
-   ```sh
-   docker compose exec web flask create_db
-   docker compose exec web flask seed_db
-   ```
-
-Isso deve criar o banco de dados, adicionar um usuário administrador e dez colaboradores fictícios. Agora, você deve ser capaz de fazer login com o usuário administrador e ver os colaboradores cadastrados.
+Seguindo esses passos, você deve ser capaz de inserir colaboradores de teste na sua aplicação sem problemas. Se precisar de mais assistência ou houver algum erro, sinta-se à vontade para perguntar!

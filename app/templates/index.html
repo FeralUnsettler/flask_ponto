@@ -1,19 +1,19 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Cadastro e Ponto</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-</head>
-<body>
-    <h1>XYZ</h1>
-    <h2>Sistema de Cadastro e Ponto</h2>
-    <form action="{{ url_for('lista_colaboradores') }}" method="POST">
-        <input type="text" name="usuario" placeholder="Usuário">
-        <input type="password" name="senha" placeholder="Senha">
-        <button type="submit">Entrar</button>
-    </form>
-    <a href="{{ url_for('registro_ponto') }}">Registro de Ponto</a>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Sistema de Cadastro e Ponto{% endblock %}
+
+{% block content %}
+<h1>XYZ</h1>
+<h2>Sistema de Cadastro e Ponto</h2>
+
+<form action="{{ url_for('routes.lista_colaboradores') }}" method="post">
+    <label for="username">Usuário:</label>
+    <input type="text" id="username" name="username" required>
+    <label for="password">Senha:</label>
+    <input type="password" id="password" name="password" required>
+    <button type="submit">Entrar</button>
+</form>
+
+<a href="{{ url_for('routes.registro_ponto') }}">Registro de Ponto</a>
+
+{% endblock %}

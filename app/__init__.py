@@ -2,13 +2,18 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
-app = Flask(__name__)
-app.config.from_object("app.config.Config")
+db = SQLAlchemy()
+migrate = Migrate()
 
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+def create_app():
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@db/ponto_colaboradores'
+    app.config['SECRET_KEY'] = 'supersecretkey'
 
-from . import routes, models
+    db.init_app(app)
+    migrate.init_app(app, db)
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    from . import routes
+    app.register_blueprint(routes.bp)
+
+    return app

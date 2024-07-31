@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Colaboradores{% endblock %}
+
+{% block content %}
+<h1>Colaboradores</h1>
+<a href="{{ url_for('routes.cadastro_colaborador') }}">Inserir Novo Colaborador</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>Matrícula</th>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Telefone</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for colaborador in colaboradores %}
+        <tr>
+            <td>{{ colaborador.id }}</td>
+            <td>{{ colaborador.nome }}</td>
+            <td>{{ colaborador.email }}</td>
+            <td>{{ colaborador.telefone }}</td>
+            <td>
+                <a href="{{ url_for('routes.alterar_colaborador', id=colaborador.id) }}">Alterar</a>
+                <form action="{{ url_for('routes.excluir_colaborador', id=colaborador.id) }}" method="post" style="display:inline;">
+                    <button type="submit">Excluir</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

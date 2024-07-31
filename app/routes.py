@@ -1,38 +1,58 @@
-from flask import render_template, request, redirect, url_for, flash
-from . import app, db
-from .models import Colaborador, Horario
+from flask import Blueprint, render_template, redirect, url_for, request, flash
+from .models import db, Colaborador
+from .forms import ColaboradorForm
 
-@app.route('/')
+bp = Blueprint('routes', __name__)
+
+@bp.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/colaboradores')
+@bp.route('/registro_ponto')
+def registro_ponto():
+    return render_template('registro_ponto.html')
+
+@bp.route('/colaboradores')
 def lista_colaboradores():
     colaboradores = Colaborador.query.all()
-    return render_template('colaboradores.html', colaboradores=colaboradores)
+    return render_template('lista_colaboradores.html', colaboradores=colaboradores)
 
-@app.route('/colaborador/novo', methods=['GET', 'POST'])
-def novo_colaborador():
-    if request.method == 'POST':
-        # Processa o formulário de criação de colaborador
-        pass
-    return render_template('cadastro_colaborador.html')
+@bp.route('/colaboradores/novo', methods=['GET', 'POST'])
+def cadastro_colaborador():
+    form = ColaboradorForm()
+    if form.validate_on_submit():
+        # Adiciona o novo colaborador ao banco de dados
+        novo_colaborador = Colaborador(
+            cpf=form.cpf.data,
+            nome=form.nome.data,
+            email=form.email.data,
+            telefone=form.telefone.data,
+            data_admissao=form.data_admissao.data,
+            cargo=form.cargo.data,
+            funcao=form.funcao.data,
+            usuario=form.usuario.data,
+        )
+        db.session.add(novo_colaborador)
+        db.session.commit()
+        flash('Colaborador cadastrado com sucesso!', 'success')
+        return redirect(url_for('routes.lista_colaboradores'))
+    return render_template('cadastro_colaborador.html', form=form)
 
-@app.route('/colaborador/<int:id>/editar', methods=['GET', 'POST'])
-def editar_colaborador(id):
+@bp.route('/colaboradores/<int:id>/editar', methods=['GET', 'POST'])
+def alterar_colaborador(id):
     colaborador = Colaborador.query.get_or_404(id)
-    if request.method == 'POST':
-        # Processa o formulário de edição de colaborador
-        pass
-    return render_template('alterar_colaborador.html', colaborador=colaborador)
+    form = ColaboradorForm(obj=colaborador)
+    if form.validate_on_submit():
+        form.populate_obj(colaborador)
+        db.session.commit()
+        flash('Colaborador atualizado com sucesso!', 'success')
+        return redirect(url_for('routes.lista_colaboradores'))
+    return render_template('alterar_colaborador.html', form=form)
 
-@app.route('/colaborador/<int:id>/excluir', methods=['POST'])
+@bp.route('/colaboradores/<int:id>/excluir', methods=['POST'])
 def excluir_colaborador(id):
     colaborador = Colaborador.query.get_or_404(id)
     db.session.delete(colaborador)
     db.session.commit()
-    return redirect(url_for('lista_colaboradores'))
-
-@app.route('/registro_ponto')
-def registro_ponto():
-    return render_template('registro_ponto.html')
+    flash('Colaborador excluído com sucesso!', 'success')
+    return redirect(url_for('routes.lista_colaboradores'))

@@ -1,28 +1,22 @@
-version: '2.28.0'
-
 services:
   web:
     build: .
-    command: python manage.py run -h 0.0.0.0
+    command: flask run --host=0.0.0.0
     volumes:
-      - .:/usr/src/app
+      - .:/app
     ports:
       - "5000:5000"
-    env_file:
-      - ./.env
+    environment:
+      FLASK_APP: run.py
+      FLASK_ENV: development
     depends_on:
       - db
 
   db:
     image: postgres:13
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=colaboradores_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ponto_colaboradores
     ports:
       - "5432:5432"
-
-volumes:
-  postgres_data:

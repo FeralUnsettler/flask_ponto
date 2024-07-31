@@ -1,33 +1,76 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro de Colaboradores</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-</head>
-<body>
-    <h1>Cadastro de Colaboradores</h1>
-    <form action="{{ url_for('novo_colaborador') }}" method="POST">
-        <label for="cpf">CPF</label>
-        <input type="text" id="cpf" name="cpf">
-        <label for="nome">Nome</label>
-        <input type="text" id="nome" name="nome">
-        <label for="data_nascimento">Data de Nascimento</label>
-        <input type="date" id="data_nascimento" name="data_nascimento">
-        <label for="data_admissao">Data de Admissão</label>
-        <input type="date" id="data_admissao" name="data_admissao">
-        <label for="email">E-mail</label>
-        <input type="email" id="email" name="email">
-        <label for="telefone">Telefone</label>
-        <input type="text" id="telefone" name="telefone">
-        <label for="usuario">Usuário</label>
-        <input type="text" id="usuario" name="usuario">
-        <label for="cargo">Cargo</label>
-        <input type="text" id="cargo" name="cargo">
-        <label for="funcao">Função</label>
-        <input type="text" id="funcao" name="funcao">
-        <button type="submit">Salvar</button>
-    </form>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Cadastro de Colaborador{% endblock %}
+
+{% block content %}
+<h1>Cadastro de Colaborador</h1>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <div>
+        {{ form.cpf.label }}<br>
+        {{ form.cpf(size=32) }}<br>
+        {% for error in form.cpf.errors %}
+            <span style="color: red;">[{{ error }}]</span><br>
+        {% endfor %}
+    </div>
+    <div>
+        {{ form.nome.label }}<br>
+        {{ form.nome(size=32) }}<br>
+        {% for error in form.nome.errors %}
+            <span style="color: red;">[{{ error }}]</span><br>
+        {% endfor %}
+    </div>
+    <div>
+        {{ form.email.label }}<br>
+        {{ form.email(size=32) }}<br>
+        {% for error in form.email.errors %}
+            <span style="color: red;">[{{ error }}]</span><br>
+        {% endfor %}
+    </div>
+    <div>
+        {{ form.telefone.label }}<br>
+        {{ form.telefone(size=32) }}<br>
+        {% for error in form.telefone.errors %}
+            <span style="color: red;">[{{ error }}]</span><br>
+        {% endfor %}
+    </div>
+    <div>
+        {{ form.data_admissao.label }}<br>
+        {{ form.data_admissao() }}<br>
+        {% for error in form.data_admissao.errors %}
+            <span style="color: red;">[{{ error }}]</span><br>
+        {% endfor %}
+    </div>
+    <div>
+        {{ form.cargo.label }}<br>
+        {{ form.cargo(size=32) }}<br>
+        {% for error in form.cargo.errors %}
+            <span style="color: red;">[{{ error }}]</span><br>
+        {% endfor %}
+    </div>
+    <div>
+        {{ form.funcao.label }}<br>
+        {{ form.funcao(size=32) }}<br>
+        {% for error in form.funcao.errors %}
+            <span style="color: red;">[{{ error }}]</span><br>
+        {% endfor %}
+    </div>
+    <div>
+        {{ form.usuario.label }}<br>
+        {{ form.usuario(size=32) }}<br>
+        {% for error in form.usuario.errors %}
+            <span style="color: red;">[{{ error }}]</span><br>
+        {% endfor %}
+    </div>
+    <div>
+        {{ form.ativo.label }}<br>
+        {{ form.ativo() }}<br>
+        {% for error in form.ativo.errors %}
+            <span style="color: red;">[{{ error }}]</span><br>
+        {% endfor %}
+    </div>
+    <div>
+        {{ form.submit() }}
+    </div>
+</form>
+{% endblock %}
